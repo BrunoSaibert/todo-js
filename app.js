@@ -9,17 +9,38 @@ function renderTodos() {
 
   for (todo of todos) {
     var todoElement = document.createElement('li');
-    var todoText = document.createTextNode(todo);
-
-    var linkElement = document.createElement('a');
-    linkElement.setAttribute('href', '#');
+    var todoSpanElement = document.createElement('span');
+    var todoText = document.createTextNode(todo.text);
     var pos = todos.indexOf(todo);
+
+    //Cria o elemento para finalizar a tarefa
+    var inputElement = document.createElement('input');
+    inputElement.setAttribute('type', 'checkbox');
+    inputElement.setAttribute('onclick', `doneTodo(this, ${pos})`);
+
+    //Se já estiver feita a tarefa
+    if (todo.done) {
+      inputElement.setAttribute('checked', 'checked');
+      todoSpanElement.setAttribute('class', 'done');
+    }
+
+    //Encapsular no SPAN
+    todoSpanElement.appendChild(inputElement);
+    todoSpanElement.appendChild(todoText);
+
+    //Cria o elemento para deletar a tarefa
+    var linkElement = document.createElement('a');
+    linkElement.setAttribute('title', 'Excluir tarefa');
+    linkElement.setAttribute('href', '#');
     linkElement.setAttribute('onclick', `deleteTodo(${pos})`);
-    var linkText = document.createTextNode('Excluir');
+    var linkText = document.createTextNode('✕');
     linkElement.appendChild(linkText);
 
-    todoElement.appendChild(todoText);
+    //Adiociona na LI os elementos criados
+    todoElement.appendChild(todoSpanElement);
     todoElement.appendChild(linkElement);
+
+    //Adiociona na UL os elementos criados
     listElement.appendChild(todoElement);
   }
 }
@@ -28,13 +49,23 @@ renderTodos();
 function addTodo() {
   var todoText = inputElement.value;
 
-  todos.push(todoText);
+  var element = {};
+  element.text = todoText;
+  element.done = false;
+
+  todos.push(element);
   inputElement.value = '';
   renderTodos();
   saveToStorage();
 }
 
 buttonElement.onclick = addTodo;
+
+function doneTodo(element, pos) {
+  element.parentElement.classList.toggle('done');
+  todos[pos].done = !todos[pos].done;
+  saveToStorage();
+}
 
 function deleteTodo(pos) {
   todos.splice(pos, 1);
